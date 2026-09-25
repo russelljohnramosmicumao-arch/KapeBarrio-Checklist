@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Morning and evening worker task checklist with photos and timestamps." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Shift Checklist</title>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img src="./icons/icon-192.png" alt="" class="brand-icon" />
+      <div>
+        <h1>Shift Checklist</h1>
+        <p>Worker morning & evening tasks</p>
+      </div>
+    </div>
+    <button id="installBtn" class="secondary-btn hidden" type="button">Install App</button>
+  </header>
+
+  <main class="container">
+    <section class="controls card">
+      <div class="control-row">
+        <div class="field grow">
+          <label for="workDate">Date</label>
+          <input id="workDate" type="date" />
+        </div>
+        <div class="field shift-field">
+          <label>Shift</label>
+          <div class="segmented" role="tablist" aria-label="Shift">
+            <button id="morningTab" class="segment active" type="button" role="tab" aria-selected="true">Morning</button>
+            <button id="eveningTab" class="segment" type="button" role="tab" aria-selected="false">Evening</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="progress-card card" aria-live="polite">
+      <div class="progress-top">
+        <div>
+          <span class="eyebrow">Today's progress</span>
+          <strong id="progressText">0 / 25 tasks done</strong>
+        </div>
+        <span id="progressPercent" class="progress-percent">0%</span>
+      </div>
+      <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+    </section>
+
+    <section id="taskList" class="task-list" aria-label="Tasks"></section>
+
+    <section class="footer-actions">
+      <button id="resetBtn" class="danger-btn" type="button">Reset This Day & Shift</button>
+      <p class="local-note">✓ Data and photos are stored locally on this device/browser.</p>
+    </section>
+  </main>
+
+  <template id="taskTemplate">
+    <article class="task card">
+      <div class="task-main">
+        <div class="task-number"></div>
+        <div class="task-content">
+          <h2 class="task-title"></h2>
+          <p class="task-note hidden"></p>
+          <div class="task-meta hidden"></div>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="done-btn" type="button">Done</button>
+        <label class="photo-btn">
+          <span>📷 Photo</span>
+          <input class="photo-input" type="file" accept="image/*" capture="environment" />
+        </label>
+      </div>
+      <div class="photo-area hidden">
+        <img class="photo-preview" alt="Proof photo" />
+        <div class="photo-info">
+          <span class="photo-label">Proof photo saved locally</span>
+          <button class="remove-photo" type="button">Remove photo</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
