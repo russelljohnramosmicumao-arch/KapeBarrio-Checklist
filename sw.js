@@ -1,4 +1,4 @@
-const CACHE = 'shift-checklist-v1';
+const CACHE = 'shift-checklist-v2';
 const ASSETS = [
   './', './index.html', './styles.css', './app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png'

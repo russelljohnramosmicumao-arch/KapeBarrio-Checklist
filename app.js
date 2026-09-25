@@ -1,38 +1,47 @@
 const MORNING_TASKS = [
-  { text: 'Magwalis ng Basura' },
-  { text: 'Tapon ng basurahan' },
-  { text: 'Sunugin basurahan' },
-  { text: 'Set up ng tables' },
-  { text: 'Punas ng tables', note: 'Clean the coolers, walang tubig dapat' },
-  { text: 'Refill ng ice yung cooler' },
-  { text: 'ilabas ang Espresso Machine' },
-  { text: 'Check yung mga milk' },
-  { text: 'Gawa ng milk (isang jug lang)' },
-  { text: 'Check condensed, refill kung kunti na' },
-  { text: 'Check evap, mag-open if wala na' },
-  { text: 'Check creamer, gawa if wala na' },
-  { text: 'Check nata, refill kung kunti na' },
-  { text: 'Check the rainbow Jelly, refill kung kunti na' },
-  { text: 'Check or magluto ng Pearls' },
-  { text: 'Magluto ng Siomai (10 pcs)' },
-  { text: 'Hugas if may huhugasin' },
-  { text: 'Magrestock ng mga cups, straws at lids' },
-  { text: 'Magrestock ng mga syrups' },
-  { text: 'Maglaba ng punas' },
-  { text: 'Magpunas ng mga baso' },
-  { text: 'Linisin yung mga pumps' },
-  { text: 'Magpunas ng mga lalagyan ng mga powders' },
-  { text: 'Magwalis sa loob' },
-  { text: 'Mag-inventory (Mon, Wed, Friday)' }
+  { section: 'PRE-SET UP', text: 'Clean and Refill lalagyan ng ice' },
+  { section: 'PRE-SET UP', text: 'Clean the cooler.' },
+  { section: 'PRE-SET UP', text: 'Prep Milk, 1 liter' },
+  { section: 'PRE-SET UP', text: 'Hugas if meron' },
+  { section: 'PRE-SET UP', text: 'I-aayos mga nahugasan kagabi' },
+  { section: 'OUTSIDE', text: 'Magwalis' },
+  { section: 'OUTSIDE', text: 'Check if may mga Tae at tanggalin' },
+  { section: 'OUTSIDE', text: 'Clean chair and tables (Wipe with zonrox)' },
+  { section: 'OUTSIDE', text: 'Change the garbage bins' },
+  { section: 'CLEAN AND REFILL', text: 'Syrup area at 500ml only' },
+  { section: 'CLEAN AND REFILL', text: 'Powder area' },
+  { section: 'CLEAN AND REFILL', text: 'Clean the machines' },
+  { section: 'CLEAN AND REFILL', text: 'Scrub the bar mats' },
+  { section: 'CLEAN AND REFILL', text: 'Wash the wipes and dry them' },
+  { section: 'CLEAN AND REFILL', text: 'Magwalis sa loob' },
+  { section: 'CLEAN AND REFILL', text: 'Restock the cups, lids, straws' },
+  { section: 'CLEAN AND REFILL', text: 'Magluto ng Siomai' },
+  { section: 'CLEAN AND REFILL', text: 'Magluto ng Pearl' },
+  { section: 'CLEAN AND REFILL', text: 'Mag-inventory' }
 ];
 
-// The supplied evening list contains these five tasks.
 const EVENING_TASKS = [
-  { text: 'Magwalis ng Basura' },
-  { text: 'Tapon ng basurahan' },
-  { text: 'Sunugin basurahan' },
-  { text: 'Set up ng tables' },
-  { text: 'Punas ng tables' }
+  { section: 'OUTSIDE', text: 'Magwalis - Pick up trash' },
+  { section: 'OUTSIDE', text: 'Check if may mga Tae at tanggalin' },
+  { section: 'OUTSIDE', text: 'Clean chair and tables (Wipe with zonrox)' },
+  { section: 'OUTSIDE', text: 'Change the garbage bins' },
+  { section: 'OUTSIDE', text: 'Set up camping chairs' },
+  { section: 'INSIDE', text: 'Magluto Pearl if wala pa' },
+  { section: 'INSIDE', text: 'Magluto ng Siomai. Maintain 10-15 pcs' },
+  { section: 'INSIDE', text: 'Restocking' },
+  { section: 'INSIDE', text: 'Baka may ice cream sa labas' },
+  { section: 'INSIDE', text: 'Clean inside' },
+  { section: 'INSIDE', text: 'Order stocks' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Maghugas' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Clean the Prep Area' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Clean the machines' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Check the cooler' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Siomai in Fridge' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Ice Creams' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Mga saksakan' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Unplug the logo' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Check the locks.' },
+  { section: 'CLOSING @ 10:30 PM', text: 'Fuse' }
 ];
 
 const state = {
@@ -99,6 +108,12 @@ function render() {
   const items = currentItems();
   els.list.innerHTML = '';
   items.forEach((item, index) => {
+    if (index === 0 || item.section !== items[index - 1].section) {
+      const heading = document.createElement('h3');
+      heading.className = 'section-heading';
+      heading.textContent = item.section || '';
+      els.list.appendChild(heading);
+    }
     const node = els.template.content.cloneNode(true);
     const card = node.querySelector('.task');
     const number = node.querySelector('.task-number');

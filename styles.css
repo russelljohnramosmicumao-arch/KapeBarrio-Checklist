@@ -90,3 +90,12 @@ input[type="date"] { width: 100%; border: 1px solid var(--line); border-radius: 
   .brand-icon { width: 42px; height: 42px; }
   h1 { font-size: 17px; }
 }
+
+.section-heading {
+  margin: 18px 4px 8px;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  font-weight: 800;
+}
+.section-heading:first-child { margin-top: 4px; }
