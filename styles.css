@@ -62,17 +62,18 @@ input[type="date"] { width: 100%; border: 1px solid var(--line); border-radius: 
 .task.completed .task-title { text-decoration: line-through; color: #6d7684; }
 .task-note { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.35; }
 .task-meta { margin-top: 7px; font-size: 11px; color: var(--green); font-weight: 800; }
-.task-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.task-actions { display: grid; grid-template-columns: 1fr 1.7fr; gap: 8px; margin-top: 12px; }
+.photo-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .done-btn, .photo-btn, .secondary-btn, .danger-btn, .remove-photo {
   border: 0; border-radius: 11px; min-height: 44px; cursor: pointer; font-weight: 850;
 }
 .done-btn { background: var(--blue); color: #fff; }
 .done-btn:hover { background: var(--blue-dark); }
 .task.completed .done-btn { background: var(--green); }
-.photo-btn { display: grid; place-items: center; background: #edf2f8; color: var(--ink); position: relative; }
+.photo-btn { display: grid; place-items: center; background: #edf2f8; color: var(--ink); position: relative; border: 0; min-height: 44px; border-radius: 11px; cursor: pointer; font-weight: 850; }
 .photo-input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 .photo-area { margin-top: 10px; display: flex; gap: 10px; align-items: center; padding-top: 10px; border-top: 1px solid var(--line); }
-.photo-preview { width: 72px; height: 72px; border-radius: 11px; object-fit: cover; border: 1px solid var(--line); }
+.photo-preview { width: 88px; height: 88px; border-radius: 11px; object-fit: cover; border: 1px solid var(--line); cursor: zoom-in; }
 .photo-info { min-width: 0; display: grid; gap: 6px; }
 .photo-label { font-size: 11px; font-weight: 800; color: var(--green); }
 .remove-photo { min-height: 34px; padding: 6px 10px; background: #f2f4f7; color: var(--muted); font-size: 11px; }
@@ -99,3 +100,23 @@ input[type="date"] { width: 100%; border: 1px solid var(--line); border-radius: 
   font-weight: 800;
 }
 .section-heading:first-child { margin-top: 4px; }
+
+.photo-modal, .camera-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 16px; }
+.photo-modal-backdrop, .camera-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.82); }
+.photo-modal-content, .camera-modal-content { position: relative; z-index: 1; max-width: min(96vw, 1100px); max-height: 94vh; }
+.photo-modal-content { display: grid; place-items: center; }
+#largePhoto { display: block; max-width: 94vw; max-height: 88vh; width: auto; height: auto; object-fit: contain; border-radius: 12px; box-shadow: 0 18px 60px rgba(0,0,0,.4); background: #111; }
+.modal-close { position: absolute; top: -8px; right: -8px; width: 42px; height: 42px; border: 0; border-radius: 50%; background: #fff; color: #172033; font-size: 28px; line-height: 1; cursor: pointer; z-index: 2; box-shadow: 0 5px 18px rgba(0,0,0,.25); }
+.camera-modal-content { width: min(96vw, 720px); background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 18px 60px rgba(0,0,0,.4); }
+.camera-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.camera-header .modal-close { position: static; width: 34px; height: 34px; font-size: 24px; box-shadow: none; background: #eef2f7; }
+#cameraVideo { display: block; width: 100%; max-height: 68vh; min-height: 280px; object-fit: cover; background: #111; }
+.camera-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 14px 6px; }
+.capture-btn { border: 0; border-radius: 12px; min-height: 48px; background: var(--blue); color: #fff; font-weight: 900; cursor: pointer; }
+.capture-btn:disabled { opacity: .5; cursor: not-allowed; }
+.camera-fallback { text-align: center; }
+.camera-status { margin: 4px 14px 14px; color: var(--muted); font-size: 12px; text-align: center; }
+@media (max-width: 560px) {
+  .task-actions { grid-template-columns: 1fr; }
+  .photo-actions { grid-template-columns: 1fr 1fr; }
+}

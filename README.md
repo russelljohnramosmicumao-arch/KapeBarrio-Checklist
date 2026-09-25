@@ -30,3 +30,10 @@ Nothing is uploaded to a server by this app. Photos and task data stay in the br
 ## Editing tasks
 
 Morning and evening task lists are at the top of `app.js` in `MORNING_TASKS` and `EVENING_TASKS`.
+
+## Photo storage and camera
+- Saved photos are compressed to JPEG (max 1600px) before being stored locally in IndexedDB, reducing device storage use.
+- Tap a saved thumbnail to open it full-size.
+- “Take Photo” uses the tablet camera directly when the browser grants camera permission. “Choose Photo” is a fallback for the device photo picker.
+- Camera access requires the app to be served over HTTPS (GitHub Pages is HTTPS) and the browser must allow camera permission.
+- Browser storage is not unlimited; the available IndexedDB quota depends on the tablet/browser. The app compresses photos to make the local storage last longer.

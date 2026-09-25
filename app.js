@@ -61,7 +61,17 @@ const els = {
   reset: document.querySelector('#resetBtn'),
   install: document.querySelector('#installBtn'),
   template: document.querySelector('#taskTemplate'),
-  toast: document.querySelector('#toast')
+  toast: document.querySelector('#toast'),
+  photoModal: document.querySelector('#photoModal'),
+  largePhoto: document.querySelector('#largePhoto'),
+  closePhotoModal: document.querySelector('#closePhotoModal'),
+  cameraModal: document.querySelector('#cameraModal'),
+  closeCameraModal: document.querySelector('#closeCameraModal'),
+  cameraVideo: document.querySelector('#cameraVideo'),
+  cameraCanvas: document.querySelector('#cameraCanvas'),
+  capturePhotoBtn: document.querySelector('#capturePhotoBtn'),
+  cameraFallbackInput: document.querySelector('#cameraFallbackInput'),
+  cameraStatus: document.querySelector('#cameraStatus')
 };
 
 let deferredInstallPrompt = null;
@@ -122,6 +132,7 @@ function render() {
     const meta = node.querySelector('.task-meta');
     const doneBtn = node.querySelector('.done-btn');
     const photoInput = node.querySelector('.photo-input');
+    const takePhotoBtn = node.querySelector('.take-photo-btn');
     const photoArea = node.querySelector('.photo-area');
     const photoPreview = node.querySelector('.photo-preview');
     const removePhoto = node.querySelector('.remove-photo');
@@ -141,16 +152,20 @@ function render() {
       photoArea.classList.remove('hidden');
       loadPhoto(item.photoId).then(blob => {
         if (!blob) return;
-        photoPreview.src = URL.createObjectURL(blob);
-        photoPreview.onload = () => URL.revokeObjectURL(photoPreview.src);
+        const objectUrl = URL.createObjectURL(blob);
+        photoPreview.src = objectUrl;
+        photoPreview.onload = () => URL.revokeObjectURL(objectUrl);
       });
     }
 
     doneBtn.addEventListener('click', () => toggleDone(index));
+    takePhotoBtn.addEventListener('click', () => openCamera(index));
     photoInput.addEventListener('change', e => {
       const file = e.target.files?.[0];
       if (file) savePhoto(index, file);
+      e.target.value = '';
     });
+    photoPreview.addEventListener('click', () => openSavedPhoto(item.photoId));
     removePhoto.addEventListener('click', () => deletePhoto(index));
     els.list.appendChild(node);
   });
@@ -250,16 +265,115 @@ async function deleteBlob(id) {
     });
   } catch {}
 }
+async function preparePhoto(file) {
+  // Compress large camera images before saving so the local browser quota lasts much longer.
+  if (!file || !file.type.startsWith('image/')) throw new Error('Please choose an image.');
+  const bitmap = await createImageBitmap(file);
+  const maxSize = 1600;
+  const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d', { alpha: false });
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+  return await new Promise((resolve, reject) => {
+    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not process photo.')), 'image/jpeg', 0.78);
+  });
+}
+
 async function savePhoto(index, file) {
-  const items = currentItems();
-  if (items[index].photoId) await deleteBlob(items[index].photoId);
-  const id = `${key()}__${index}__${Date.now()}`;
-  await saveBlob(id, file);
-  items[index].photoId = id;
-  items[index].photoTimestamp = new Date().toISOString();
-  writeItems(items);
-  render();
-  showToast('Photo saved on this device');
+  try {
+    const items = currentItems();
+    if (items[index].photoId) await deleteBlob(items[index].photoId);
+    const id = `${key()}__${index}__${Date.now()}`;
+    const compressed = await preparePhoto(file);
+    await saveBlob(id, compressed);
+    items[index].photoId = id;
+    items[index].photoTimestamp = new Date().toISOString();
+    writeItems(items);
+    render();
+    showToast('Photo saved on this device');
+  } catch (error) {
+    console.error(error);
+    showToast('Could not save photo. Try another photo.');
+  }
+}
+
+let activeCameraTask = null;
+let cameraStream = null;
+
+async function openCamera(index) {
+  activeCameraTask = index;
+  els.cameraModal.classList.remove('hidden');
+  els.cameraStatus.textContent = 'Starting camera…';
+  els.capturePhotoBtn.disabled = true;
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error('Camera API unavailable');
+    }
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    els.cameraVideo.srcObject = cameraStream;
+    await els.cameraVideo.play();
+    els.capturePhotoBtn.disabled = false;
+    els.cameraStatus.textContent = 'Point the camera at the completed task and tap Capture.';
+  } catch (error) {
+    console.error(error);
+    els.cameraStatus.textContent = 'Camera access was not available. Use “Choose from device” below.';
+    els.capturePhotoBtn.disabled = true;
+  }
+}
+
+function closeCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+  els.cameraVideo.srcObject = null;
+  els.cameraModal.classList.add('hidden');
+  activeCameraTask = null;
+  els.cameraFallbackInput.value = '';
+}
+
+async function capturePhoto() {
+  if (activeCameraTask === null || !cameraStream) return;
+  const video = els.cameraVideo;
+  const canvas = els.cameraCanvas;
+  const maxSize = 1600;
+  const scale = Math.min(1, maxSize / Math.max(video.videoWidth, video.videoHeight));
+  canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+  canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.78));
+  const taskIndex = activeCameraTask;
+  closeCamera();
+  if (blob) await savePhoto(taskIndex, blob);
+}
+
+async function openSavedPhoto(photoId) {
+  if (!photoId) return;
+  const blob = await loadPhoto(photoId);
+  if (!blob) { showToast('Saved photo could not be found'); return; }
+  const url = URL.createObjectURL(blob);
+  els.largePhoto.src = url;
+  els.largePhoto.onload = () => {
+    if (els.largePhoto.dataset.url && els.largePhoto.dataset.url !== url) URL.revokeObjectURL(els.largePhoto.dataset.url);
+    els.largePhoto.dataset.url = url;
+  };
+  els.photoModal.classList.remove('hidden');
+}
+
+function closeSavedPhoto() {
+  const url = els.largePhoto.dataset.url;
+  if (url) URL.revokeObjectURL(url);
+  els.largePhoto.dataset.url = '';
+  els.largePhoto.src = '';
+  els.photoModal.classList.add('hidden');
 }
 async function deletePhoto(index) {
   const items = currentItems();
@@ -271,6 +385,26 @@ async function deletePhoto(index) {
   render();
   showToast('Photo removed');
 }
+
+els.closePhotoModal.addEventListener('click', closeSavedPhoto);
+els.photoModal.querySelector('.photo-modal-backdrop').addEventListener('click', closeSavedPhoto);
+els.closeCameraModal.addEventListener('click', closeCamera);
+els.cameraModal.querySelector('.camera-modal-backdrop').addEventListener('click', closeCamera);
+els.capturePhotoBtn.addEventListener('click', capturePhoto);
+els.cameraFallbackInput.addEventListener('change', e => {
+  const file = e.target.files?.[0];
+  if (file && activeCameraTask !== null) {
+    const taskIndex = activeCameraTask;
+    closeCamera();
+    savePhoto(taskIndex, file);
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeSavedPhoto();
+    closeCamera();
+  }
+});
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();

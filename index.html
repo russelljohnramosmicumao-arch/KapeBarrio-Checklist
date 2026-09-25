@@ -71,10 +71,13 @@
       </div>
       <div class="task-actions">
         <button class="done-btn" type="button">Done</button>
-        <label class="photo-btn">
-          <span>📷 Photo</span>
-          <input class="photo-input" type="file" accept="image/*" capture="environment" />
-        </label>
+        <div class="photo-actions">
+          <button class="photo-btn take-photo-btn" type="button">📷 Take Photo</button>
+          <label class="photo-btn upload-photo-btn">
+            <span>🖼️ Choose Photo</span>
+            <input class="photo-input" type="file" accept="image/*" />
+          </label>
+        </div>
       </div>
       <div class="photo-area hidden">
         <img class="photo-preview" alt="Proof photo" />
@@ -85,6 +88,34 @@
       </div>
     </article>
   </template>
+
+  <div id="photoModal" class="photo-modal hidden" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <div class="photo-modal-backdrop"></div>
+    <div class="photo-modal-content">
+      <button id="closePhotoModal" class="modal-close" type="button" aria-label="Close">×</button>
+      <img id="largePhoto" alt="Saved proof photo" />
+    </div>
+  </div>
+
+  <div id="cameraModal" class="camera-modal hidden" role="dialog" aria-modal="true" aria-label="Take photo">
+    <div class="camera-modal-backdrop"></div>
+    <div class="camera-modal-content">
+      <div class="camera-header">
+        <strong>Take Photo</strong>
+        <button id="closeCameraModal" class="modal-close" type="button" aria-label="Close">×</button>
+      </div>
+      <video id="cameraVideo" autoplay playsinline muted></video>
+      <canvas id="cameraCanvas" class="hidden"></canvas>
+      <div class="camera-actions">
+        <button id="capturePhotoBtn" class="capture-btn" type="button">● Capture</button>
+        <label class="photo-btn camera-fallback">
+          <span>Choose from device</span>
+          <input id="cameraFallbackInput" type="file" accept="image/*" />
+        </label>
+      </div>
+      <p id="cameraStatus" class="camera-status">Allow camera access when your tablet asks.</p>
+    </div>
+  </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./app.js"></script>
